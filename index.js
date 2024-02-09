@@ -4,7 +4,13 @@ require("dotenv").config();
 const http = require("http");
 const app = express();
 const port = process.env.PORT || 5000;
-app.use(cors());
+// app.use(cors());
+app.use(
+  cors({
+    origin: "*", // or '*' for any origin
+    credentials: true, // if you need to include cookies in the request
+  })
+);
 app.use(express.json());
 app.use(express.static("front"));
 app.use(express.urlencoded({ extended: true }));
