@@ -19,6 +19,7 @@ function setupSocket(server) {
   io = socketIo(server, {
     cors: {
       origin: "*",
+      methods: ["GET", "POST"],
     },
   });
 
