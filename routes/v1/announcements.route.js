@@ -7,4 +7,9 @@ router.route("/").get(announcementControllers.getAllAnnouncements);
 
 router.route("/addAnnouncement").post(announcementControllers.addAnnouncement);
 
+router.get(
+  "/getAnnouncement/organizationId/:organizationId",
+  announcementControllers.getAnnouncementsByOrganization
+);
+
 module.exports = router;
