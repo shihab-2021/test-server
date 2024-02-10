@@ -18,7 +18,7 @@ function setupSocket(server) {
 
   io = socketIo(server, {
     cors: {
-      origin: "http://localhost:3000",
+      origin: allowedOrigins,
       methods: ["GET", "POST"],
       credentials: true,
     },
