@@ -11,4 +11,8 @@ router
   .route("/getNotification/userEmail/:userEmail")
   .get(notificationControllers.getUserNotifications);
 
+router
+  .route("/makeAsRead/notificationId/:notificationId")
+  .put(notificationControllers.markNotificationAsRead);
+
 module.exports = router;

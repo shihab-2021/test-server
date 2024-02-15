@@ -117,3 +117,36 @@ const getAdminNotifications = async (user) => {
     })
     .toArray();
 };
+
+module.exports.markNotificationAsRead = async (req, res) => {
+  try {
+    // Extract notification ID from request parameters
+    const { notificationId } = req.params;
+
+    // Validate notificationId
+    if (!ObjectId.isValid(notificationId)) {
+      return res.status(400).json({ message: "Invalid notificationId" });
+    }
+
+    // Extract user's email from request body
+    const { userEmail } = req.body;
+
+    // Update the notification document to add user's email to readBy array
+    const updatedNotification = await notificationCollection.findOneAndUpdate(
+      { _id: ObjectId(notificationId) },
+      { $addToSet: { readBy: userEmail } }, // Use $addToSet to avoid duplicate emails
+      { returnOriginal: false } // Return the updated document
+    );
+
+    // Check if the notification exists and is updated
+    if (!updatedNotification.value) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+
+    // Return the updated notification
+    res.status(200).json({ notification: updatedNotification.value });
+  } catch (error) {
+    console.error("Error marking notification as read:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
