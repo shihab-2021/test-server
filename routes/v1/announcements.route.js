@@ -12,4 +12,9 @@ router.get(
   announcementControllers.getAnnouncementsByOrganization
 );
 
+router.post(
+  "/makeAsRead/announcementId/:announcementId",
+  announcementControllers.markAnnouncementAsRead
+);
+
 module.exports = router;
