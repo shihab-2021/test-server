@@ -12,7 +12,7 @@ router.get(
   announcementControllers.getAnnouncementsByOrganization
 );
 
-router.post(
+router.put(
   "/makeAsRead/announcementId/:announcementId",
   announcementControllers.markAnnouncementAsRead
 );
