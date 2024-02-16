@@ -4,6 +4,7 @@ const announcementCollection = client
   .db("experiment-labs")
   .collection("announcements");
 const { getIo } = require("../socketSetup");
+const cron = require("node-cron");
 
 module.exports.getAllAnnouncements = async (req, res) => {
   const announcements = await announcementCollection.find().toArray();
@@ -109,3 +110,25 @@ module.exports.markAnnouncementAsRemoved = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// Schedule a cron job to delete old announcements every day at midnight
+cron.schedule("0 0 * * *", async () => {
+  try {
+    console.log("Starting cron job to delete old announcements...");
+
+    // Calculate the date one month ago
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    // Delete announcements published more than a month ago
+    const deleteResult = await announcementCollection.deleteMany({
+      $expr: {
+        $lt: [{ $toDate: "$dateTime" }, oneMonthAgo],
+      },
+    });
+
+    console.log(`${deleteResult.deletedCount} old announcements deleted.`);
+  } catch (error) {
+    console.error("Error deleting old announcements:", error);
+  }
+});
