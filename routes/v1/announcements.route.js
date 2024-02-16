@@ -17,4 +17,9 @@ router.put(
   announcementControllers.markAnnouncementAsRead
 );
 
+router.put(
+  "/makeAsRemove/announcementId/:announcementId",
+  announcementControllers.markAnnouncementAsRemoved
+);
+
 module.exports = router;

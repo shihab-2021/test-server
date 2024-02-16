@@ -76,3 +76,36 @@ module.exports.markAnnouncementAsRead = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+module.exports.markAnnouncementAsRemoved = async (req, res) => {
+  try {
+    // Extract announcement ID from request parameters
+    const { announcementId } = req.params;
+
+    // Validate announcementId
+    if (!ObjectId.isValid(announcementId)) {
+      return res.status(400).json({ message: "Invalid announcementId" });
+    }
+
+    // Extract user's email from request body
+    const { userEmail } = req.body;
+
+    // Update the announcement document to add user's email to removeBy array
+    const updatedAnnouncement = await announcementCollection.findOneAndUpdate(
+      { _id: ObjectId(announcementId) },
+      { $addToSet: { removeBy: userEmail } }, // Use $addToSet to avoid duplicate emails
+      { returnOriginal: false } // Return the updated document
+    );
+
+    // Check if the announcement exists and is updated
+    if (!updatedAnnouncement.value) {
+      return res.status(404).json({ message: "Announcement not found" });
+    }
+
+    // Return the updated announcement
+    res.status(200).json({ announcement: updatedAnnouncement.value });
+  } catch (error) {
+    console.error("Error marking announcement as read:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
