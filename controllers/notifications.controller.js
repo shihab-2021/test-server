@@ -5,6 +5,7 @@ const notificationCollection = client
   .collection("notifications");
 const userCollection = client.db("experiment-labs").collection("users");
 const { getIo } = require("../socketSetup");
+const cron = require("node-cron");
 
 module.exports.getAllNotifications = async (req, res) => {
   const notifications = await notificationCollection.find().toArray();
@@ -50,30 +51,6 @@ module.exports.getUserNotifications = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
-// Helper function to get notifications for 'Students' type
-// const getStudentNotifications = async (user) => {
-//   return notificationCollection
-//     .find({
-//       "recipient.organizationId": user.organizationId,
-//       $or: [
-//         {
-//           "recipient.type": "Students",
-//           "recipient.courseId": {
-//             $in: user.courses.map((course) => course.courseId),
-//           },
-//           "recipient.batches": {
-//             $in: user.courses.map((course) => course.batchId),
-//           },
-//         },
-//         {
-//           "recipient.type": "Specific Student",
-//           "recipient.recipientEmail": user.email,
-//         },
-//       ],
-//     })
-//     .toArray();
-// };
 
 const getStudentNotifications = async (user) => {
   return notificationCollection
@@ -150,3 +127,25 @@ module.exports.markNotificationAsRead = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// Schedule a cron job to delete old notifications every day at midnight
+cron.schedule("0 0 * * *", async () => {
+  try {
+    console.log("Starting cron job to delete old notifications...");
+
+    // Calculate the date one month ago
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    // Delete notifications published more than a month ago
+    const deleteResult = await notificationCollection.deleteMany({
+      $expr: {
+        $lt: [{ $toDate: "$dateTime" }, oneMonthAgo],
+      },
+    });
+
+    console.log(`${deleteResult.deletedCount} old notifications deleted.`);
+  } catch (error) {
+    console.error("Error deleting old notifications:", error);
+  }
+});
